@@ -4,7 +4,8 @@
 # license information.
 # --------------------------------------------------------------------------
 
-import requests
+import ssl
+from six.moves import http_client
 
 
 class HTTPTransport(object):
@@ -12,8 +13,36 @@ class HTTPTransport(object):
     Class providing an generic HTTP request interface
     """
 
+    def __init__(self, hostname, ca_cert=None):
+        self._ca_cert = ca_cert
+        ssl_context = self._create_ssl_context()
+        self._connection = http_client.HTTPSConnection(hostname, context=ssl_context)
+
+    def _create_ssl_context(self):
+        """
+        Creates an SSL context for use with the HTTP Client
+        """
+        ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
+        ssl_context.load_verify_locations(cadata=self._ca_cert)
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        ssl_context.check_hostname = True
+        return ssl_context
+
+    def connect(self):
+        self._connection.connect()
+
     def post(self, url, data):
         """
         Make an HTTP POST request
+
+        :param str url: Relative URL representing request destination
+        :param data:
+
+        :returns: The HTTP response body.
         """
-        requests.post(url, data=data)
+        self._connection.request(method="POST", url=url, body=data)
+        response = self._connection.getresponse()
+        if not response.status == 200:
+            pass
+        data = response.read()
+        return data
