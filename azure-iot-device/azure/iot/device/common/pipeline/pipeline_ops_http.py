@@ -6,6 +6,7 @@
 from . import PipelineOperation
 
 
+# TODO: revist naming
 class SetHTTPConnectionArgsOperation(PipelineOperation):
     """
     A PipelineOperation object which contains data used to connect to a server using the HTTP protocol.
@@ -26,7 +27,8 @@ class HTTPPostOperation(PipelineOperation):
     This operation is in the group of HTTP operations because it is specific to the HTTP protocol.
     """
 
-    def __init__(self, url, data, callback=None):
+    def __init__(self, url, params=None, data=None, callback=None):
         super(HTTPPostOperation, self).__init__(callback=callback)
         self.url = url
+        self.params = params
         self.data = data

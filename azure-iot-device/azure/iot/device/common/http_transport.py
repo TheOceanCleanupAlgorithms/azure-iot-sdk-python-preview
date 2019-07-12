@@ -5,7 +5,16 @@
 # --------------------------------------------------------------------------
 
 import ssl
-from six.moves import http_client
+from six.moves import http_client, urllib
+
+
+def _encode_params_in_url(url, params):
+    if params:
+        encoded_params = urllib.parse.urlencode(params)
+        new_url = url + "?" + encoded_params
+        return new_url
+    else:
+        return url
 
 
 class HTTPTransport(object):
@@ -31,16 +40,18 @@ class HTTPTransport(object):
     def connect(self):
         self._connection.connect()
 
-    def post(self, url, data):
+    def post(self, url, params=None, data=None):
         """
         Make an HTTP POST request
 
         :param str url: Relative URL representing request destination
+        :param params:
         :param data:
 
         :returns: The HTTP response body.
         """
-        self._connection.request(method="POST", url=url, body=data)
+        encoded_url = _encode_params_in_url(url, params)
+        self._connection.request(method="POST", url=encoded_url, params=params, body=data)
         response = self._connection.getresponse()
         if not response.status == 200:
             pass

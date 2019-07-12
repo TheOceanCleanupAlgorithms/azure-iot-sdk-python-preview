@@ -22,7 +22,7 @@ class UseAuthProviderStage(PipelineStage):
                 stage=self,
                 original_op=op,
                 new_op=pipeline_ops_edge.SetAuthProviderArgsOperation(
-                    hostname=auth_provider.hostname, ca_cert=auth_provider.ca_cert
+                    gateway_hostname=auth_provider.gatewayhostname, ca_cert=auth_provider.ca_cert
                 ),
             )
         else:

@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 
 import logging
+from azure.iot.device.common.http_transport import HTTPTransport
 from . import PipelineStage, pipeline_ops_http
 
 logger = logging.getLogger(__name__)
@@ -19,4 +20,3 @@ class HTTPTransportStage(PipelineStage):
     def _run_op(self, op):
         if isinstance(op, pipeline_ops_http.HTTPPostOperation):
             logger.info("")
-            pass

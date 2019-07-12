@@ -18,12 +18,15 @@ class SetAuthProviderOperation(PipelineOperation):
 # Also worth considering if there's even a point to having this operation separate
 # from the above one - why have a separate stage just to extract the properties from the
 # auth provider?
+# Argument for having it -> separation of concern, only pass the minimum values required
+# In this case, Edge auth gives us lots of fields we don't need (e.g. hostname, device id, etc.)
 class SetAuthProviderArgsOperation(PipelineOperation):
-    def __init__(self, hostname, ca_cert, callback=None):
+    def __init__(self, gateway_hostname, ca_cert, callback=None):
         super(SetAuthProviderArgsOperation, self).__init__(callback=callback)
-        self.hostname = hostname
+        # No need for hostname when talking to the Edge endpoint.
+        # GatewayHostname and CA cert are REQUIRED for the Edge endpoint.
+        self.gateway_hostname
         self.ca_cert = ca_cert
-        # Do we need a GatewayHostName here? This is Edge after all...
 
 
 class InvokeMethodOperation(PipelineOperation):
