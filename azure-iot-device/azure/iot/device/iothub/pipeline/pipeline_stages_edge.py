@@ -5,7 +5,8 @@
 # --------------------------------------------------------------------------
 
 import logging
-from azure.iot.device.common.pipeline import PipelineStage, pipeline_ops_edge, operation_flow
+from azure.iot.device.common.pipeline import PipelineStage, operation_flow
+from . import pipeline_ops_edge
 
 
 logger = logging.getLogger(__name__)

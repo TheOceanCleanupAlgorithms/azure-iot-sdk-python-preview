@@ -27,27 +27,27 @@ class GenericIoTHubClient(AbstractIoTHubClient):
     This class needs to be extended for specific clients.
     """
 
-    def __init__(self, pipeline):
+    def __init__(self, auth_provider):
         """Initializer for a generic asynchronous client.
 
         This initializer should not be called directly.
         Instead, use one of the 'create_from_' classmethods to instantiate
 
-        :param pipeline: The pipeline that the client will use.
+        :param auth_provider: The AuthenticationProvider the client will use for credentials
         """
-        super().__init__(pipeline)
+        super().__init__(auth_provider)
         self._inbox_manager = InboxManager(inbox_type=AsyncClientInbox)
-        self._pipeline.on_connected = self._on_connected
-        self._pipeline.on_disconnected = self._on_disconnected
-        self._pipeline.on_method_request_received = self._inbox_manager.route_method_request
-        self._pipeline.on_twin_patch_received = self._inbox_manager.route_twin_patch
+        self._iothub_pipeline.on_connected = self._on_connected
+        self._iothub_pipeline.on_disconnected = self._on_disconnected
+        self._iothub_pipeline.on_method_request_received = self._inbox_manager.route_method_request
+        self._iothub_pipeline.on_twin_patch_received = self._inbox_manager.route_twin_patch
 
     def _on_connected(self):
-        """Helper handler that is called upon a pipeline connect"""
+        """Helper handler that is called upon an iothub pipeline connect"""
         logger.info("Connection State - Connected")
 
     def _on_disconnected(self):
-        """Helper handler that is called upon a pipeline disconnect"""
+        """Helper handler that is called upon an iothub pipeline disconnect"""
         logger.info("Connection State - Disconnected")
         self._inbox_manager.clear_all_method_requests()
         logger.info("Cleared all pending method requests due to disconnect")
@@ -59,7 +59,7 @@ class GenericIoTHubClient(AbstractIoTHubClient):
         that was provided when this object was initialized.
         """
         logger.info("Connecting to Hub...")
-        connect_async = async_adapter.emulate_async(self._pipeline.connect)
+        connect_async = async_adapter.emulate_async(self._iothub_pipeline.connect)
 
         def sync_callback():
             logger.info("Successfully connected to Hub")
@@ -73,7 +73,7 @@ class GenericIoTHubClient(AbstractIoTHubClient):
         """Disconnect the client from the Azure IoT Hub or Azure IoT Edge Hub instance.
         """
         logger.info("Disconnecting from Hub...")
-        disconnect_async = async_adapter.emulate_async(self._pipeline.disconnect)
+        disconnect_async = async_adapter.emulate_async(self._iothub_pipeline.disconnect)
 
         def sync_callback():
             logger.info("Successfully disconnected from Hub")
@@ -96,7 +96,7 @@ class GenericIoTHubClient(AbstractIoTHubClient):
             message = Message(message)
 
         logger.info("Sending message to Hub...")
-        send_d2c_message_async = async_adapter.emulate_async(self._pipeline.send_d2c_message)
+        send_d2c_message_async = async_adapter.emulate_async(self._iothub_pipeline.send_d2c_message)
 
         def sync_callback():
             logger.info("Successfully sent message to Hub")
@@ -117,7 +117,7 @@ class GenericIoTHubClient(AbstractIoTHubClient):
 
         :returns: MethodRequest object representing the received method request.
         """
-        if not self._pipeline.feature_enabled[constant.METHODS]:
+        if not self._iothub_pipeline.feature_enabled[constant.METHODS]:
             await self._enable_feature(constant.METHODS)
 
         method_inbox = self._inbox_manager.get_method_request_inbox(method_name)
@@ -137,7 +137,7 @@ class GenericIoTHubClient(AbstractIoTHubClient):
         """
         logger.info("Sending method response to Hub...")
         send_method_response_async = async_adapter.emulate_async(
-            self._pipeline.send_method_response
+            self._iothub_pipeline.send_method_response
         )
 
         def sync_callback():
@@ -156,7 +156,7 @@ class GenericIoTHubClient(AbstractIoTHubClient):
         See azure.iot.device.common.pipeline.constant for possible values.
         """
         logger.info("Enabling feature:" + feature_name + "...")
-        enable_feature_async = async_adapter.emulate_async(self._pipeline.enable_feature)
+        enable_feature_async = async_adapter.emulate_async(self._iothub_pipeline.enable_feature)
 
         def sync_callback():
             logger.info("Successfully enabled feature:" + feature_name)
@@ -174,10 +174,10 @@ class GenericIoTHubClient(AbstractIoTHubClient):
         """
         logger.info("Getting twin")
 
-        if not self._pipeline.feature_enabled[constant.TWIN]:
+        if not self._iothub_pipeline.feature_enabled[constant.TWIN]:
             await self._enable_feature(constant.TWIN)
 
-        get_twin_async = async_adapter.emulate_async(self._pipeline.get_twin)
+        get_twin_async = async_adapter.emulate_async(self._iothub_pipeline.get_twin)
 
         twin = None
 
@@ -205,11 +205,11 @@ class GenericIoTHubClient(AbstractIoTHubClient):
         """
         logger.info("Patching twin reported properties")
 
-        if not self._pipeline.feature_enabled[constant.TWIN]:
+        if not self._iothub_pipeline.feature_enabled[constant.TWIN]:
             await self._enable_feature(constant.TWIN)
 
         patch_twin_async = async_adapter.emulate_async(
-            self._pipeline.patch_twin_reported_properties
+            self._iothub_pipeline.patch_twin_reported_properties
         )
 
         def sync_callback():
@@ -228,7 +228,7 @@ class GenericIoTHubClient(AbstractIoTHubClient):
 
         :returns: desired property patch.  This can be dict, str, int, float, bool, or None (JSON compatible values)
         """
-        if not self._pipeline.feature_enabled[constant.TWIN_PATCHES]:
+        if not self._iothub_pipeline.feature_enabled[constant.TWIN_PATCHES]:
             await self._enable_feature(constant.TWIN_PATCHES)
         twin_patch_inbox = self._inbox_manager.get_twin_patch_inbox()
 
@@ -244,16 +244,16 @@ class IoTHubDeviceClient(GenericIoTHubClient, AbstractIoTHubDeviceClient):
     Intended for usage with Python 3.5.3+
     """
 
-    def __init__(self, pipeline):
+    def __init__(self, auth_provider):
         """Initializer for a IoTHubDeviceClient.
 
         This initializer should not be called directly.
         Instead, use one of the 'create_from_' classmethods to instantiate
 
-        :param pipeline: The pipeline that the client will use.
+        :param auth_provider: The AuthenticationProvider the client will use for credentials
         """
-        super().__init__(pipeline)
-        self._pipeline.on_c2d_message_received = self._inbox_manager.route_c2d_message
+        super().__init__(auth_provider)
+        self._iothub_pipeline.on_c2d_message_received = self._inbox_manager.route_c2d_message
 
     async def receive_c2d_message(self):
         """Receive a C2D message that has been sent from the Azure IoT Hub.
@@ -262,7 +262,7 @@ class IoTHubDeviceClient(GenericIoTHubClient, AbstractIoTHubDeviceClient):
 
         :returns: Message that was sent from the Azure IoT Hub.
         """
-        if not self._pipeline.feature_enabled[constant.C2D_MSG]:
+        if not self._iothub_pipeline.feature_enabled[constant.C2D_MSG]:
             await self._enable_feature(constant.C2D_MSG)
         c2d_inbox = self._inbox_manager.get_c2d_message_inbox()
 
@@ -278,16 +278,16 @@ class IoTHubModuleClient(GenericIoTHubClient, AbstractIoTHubModuleClient):
     Intended for usage with Python 3.5.3+
     """
 
-    def __init__(self, pipeline):
+    def __init__(self, auth_provider):
         """Intializer for a IoTHubModuleClient.
 
         This initializer should not be called directly.
         Instead, use one of the 'create_from_' classmethods to instantiate
 
-        :param pipeline: The pipeline that the client will use.
+        :param auth_provider: The AuthenticationProvider the client will use for credentials
         """
-        super().__init__(pipeline)
-        self._pipeline.on_input_message_received = self._inbox_manager.route_input_message
+        super().__init__(auth_provider)
+        self._iothub_pipeline.on_input_message_received = self._inbox_manager.route_input_message
 
     async def send_to_output(self, message, output_name):
         """Sends an event/message to the given module output.
@@ -307,7 +307,9 @@ class IoTHubModuleClient(GenericIoTHubClient, AbstractIoTHubModuleClient):
         message.output_name = output_name
 
         logger.info("Sending message to output:" + output_name + "...")
-        send_output_event_async = async_adapter.emulate_async(self._pipeline.send_output_event)
+        send_output_event_async = async_adapter.emulate_async(
+            self._iothub_pipeline.send_output_event
+        )
 
         def sync_callback():
             logger.info("Successfully sent message to output: " + output_name)
@@ -325,7 +327,7 @@ class IoTHubModuleClient(GenericIoTHubClient, AbstractIoTHubModuleClient):
         :param str input_name: The input name to receive a message on.
         :returns: Message that was sent to the specified input.
         """
-        if not self._pipeline.feature_enabled[constant.INPUT_MSG]:
+        if not self._iothub_pipeline.feature_enabled[constant.INPUT_MSG]:
             await self._enable_feature(constant.INPUT_MSG)
         inbox = self._inbox_manager.get_input_message_inbox(input_name)
 

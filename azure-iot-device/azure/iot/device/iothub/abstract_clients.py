@@ -12,7 +12,7 @@ import logging
 import os
 import io
 from . import auth
-from .pipeline import IoTHubPipeline
+from .pipeline import IoTHubPipeline, EdgePipeline
 
 
 logger = logging.getLogger(__name__)
@@ -22,14 +22,14 @@ logger = logging.getLogger(__name__)
 class AbstractIoTHubClient(object):
     """A superclass representing a generic client. This class needs to be extended for specific clients."""
 
-    def __init__(self, pipeline):
+    def __init__(self, auth_provider):
         """Initializer for a generic client.
 
-        :param pipeline: The pipeline that the client will use.
+        :param auth_provider: The AuthenticationProvider the client will use for credentials
         """
         # TODO: Refactor this to be an iothub_pipeline, and instantiate here instead of
         # in the factory methods
-        self._pipeline = pipeline
+        self._iothub_pipeline = IoTHubPipeline(auth_provider)
 
     @classmethod
     def create_from_connection_string(cls, connection_string, trusted_certificate_chain=None):
@@ -49,8 +49,7 @@ class AbstractIoTHubClient(object):
         authentication_provider.ca_cert = (
             trusted_certificate_chain
         )  # TODO: make this part of the instantiation
-        pipeline = IoTHubPipeline(authentication_provider)
-        return cls(pipeline)
+        return cls(authentication_provider)
 
     @classmethod
     def create_from_shared_access_signature(cls, sas_token):
@@ -64,8 +63,7 @@ class AbstractIoTHubClient(object):
         :raises: ValueError if given an invalid sas_token
         """
         authentication_provider = auth.SharedAccessSignatureAuthenticationProvider.parse(sas_token)
-        pipeline = IoTHubPipeline(authentication_provider)
-        return cls(pipeline)
+        return cls(authentication_provider)
 
     @abc.abstractmethod
     def connect(self):
@@ -116,8 +114,7 @@ class AbstractIoTHubDeviceClient(AbstractIoTHubClient):
         authentication_provider = auth.X509AuthenticationProvider(
             hostname=hostname, device_id=device_id, x509=x509
         )
-        pipeline = IoTHubPipeline(authentication_provider)
-        return cls(pipeline)
+        return cls(authentication_provider)
 
     @abc.abstractmethod
     def receive_c2d_message(self):
@@ -126,6 +123,17 @@ class AbstractIoTHubDeviceClient(AbstractIoTHubClient):
 
 @six.add_metaclass(abc.ABCMeta)
 class AbstractIoTHubModuleClient(AbstractIoTHubClient):
+    def __init__(self, auth_provider):
+        """Initializer for a module client.
+
+        :param auth_provider: The AuthenticationProvider the client will use for credentials
+        """
+        super(AbstractIoTHubModuleClient, self).__init__(auth_provider)
+        try:
+            self._edge_pipeline = EdgePipeline(auth_provider)
+        except ValueError:
+            self._edge_pipeline = None
+
     @classmethod
     def create_from_edge_environment(cls):
         """
@@ -187,8 +195,7 @@ class AbstractIoTHubModuleClient(AbstractIoTHubClient):
                 api_version=api_version,
             )
 
-        pipeline = IoTHubPipeline(authentication_provider)
-        return cls(pipeline)
+        return cls(authentication_provider)
 
     @abc.abstractmethod
     def send_to_output(self, message, output_name):

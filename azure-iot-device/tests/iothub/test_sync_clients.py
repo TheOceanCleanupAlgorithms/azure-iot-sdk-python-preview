@@ -23,19 +23,19 @@ from azure.iot.device.iothub.auth import IoTEdgeError
 class SharedClientInstantiationTests(object):
     @pytest.mark.it("Sets on_connected handler in pipeline")
     def test_sets_on_connected_handler_in_pipeline(self, client):
-        assert client._pipeline.on_connected is not None
-        assert client._pipeline.on_connected == client._on_connected
+        assert client._iothub_pipeline.on_connected is not None
+        assert client._iothub_pipeline.on_connected == client._on_connected
 
     @pytest.mark.it("Sets on_disconnected handler in pipeline")
     def test_sets_on_disconnected_handler_in_pipeline(self, client):
-        assert client._pipeline.on_disconnected is not None
-        assert client._pipeline.on_disconnected == client._on_disconnected
+        assert client._iothub_pipeline.on_disconnected is not None
+        assert client._iothub_pipeline.on_disconnected == client._on_disconnected
 
     @pytest.mark.it("Sets on_method_request_received handler in pipeline")
     def test_sets_on_method_request_received_handler_in_pipleline(self, client):
-        assert client._pipeline.on_method_request_received is not None
+        assert client._iothub_pipeline.on_method_request_received is not None
         assert (
-            client._pipeline.on_method_request_received
+            client._iothub_pipeline.on_method_request_received
             == client._inbox_manager.route_method_request
         )
 
@@ -83,7 +83,7 @@ class SharedClientFromCreateFromConnectionStringTests(object):
         assert mock_auth_parse.return_value.ca_cert is trusted_cert_chain
         assert mock_pipeline_init.call_count == 1
         assert mock_pipeline_init.call_args == mocker.call(mock_auth_parse.return_value)
-        assert client._pipeline == mock_pipeline_init.return_value
+        assert client._iothub_pipeline == mock_pipeline_init.return_value
 
     # TODO: If auth package was refactored to use ConnectionString class, tests from that
     # class would increase the coverage here.
@@ -125,7 +125,7 @@ class SharedClientFromCreateFromSharedAccessSignature(object):
         assert mock_auth_parse.call_count == 1
         assert mock_pipeline_init.call_count == 1
         assert mock_pipeline_init.call_args == mocker.call(mock_auth_parse.return_value)
-        assert client._pipeline == mock_pipeline_init.return_value
+        assert client._iothub_pipeline == mock_pipeline_init.return_value
 
     # TODO: If auth package was refactored to use SasToken class, tests from that
     # class would increase the coverage here.
@@ -164,7 +164,7 @@ class SharedClientFromCreateFromX509Certificate(object):
         assert mock_auth.call_count == 1
         assert mock_pipeline_init.call_count == 1
         assert mock_pipeline_init.call_args == mocker.call(mock_auth.return_value)
-        assert client._pipeline == mock_pipeline_init.return_value
+        assert client._iothub_pipeline == mock_pipeline_init.return_value
 
 
 class WaitsForEventCompletion(object):
@@ -684,8 +684,11 @@ class TestIoTHubDeviceClientInstantiation(
 ):
     @pytest.mark.it("Sets on_c2d_message_received handler in pipeline")
     def test_sets_on_c2d_message_received_handler_in_pipeline(self, client):
-        assert client._pipeline.on_c2d_message_received is not None
-        assert client._pipeline.on_c2d_message_received == client._inbox_manager.route_c2d_message
+        assert client._iothub_pipeline.on_c2d_message_received is not None
+        assert (
+            client._iothub_pipeline.on_c2d_message_received
+            == client._inbox_manager.route_c2d_message
+        )
 
 
 @pytest.mark.describe("IoTHubDeviceClient (Synchronous) - .create_from_connection_string()")
@@ -896,9 +899,10 @@ class TestIoTHubModuleClientInstantiation(
 ):
     @pytest.mark.it("Sets on_input_message_received handler in pipeline")
     def test_sets_on_input_message_received_handler_in_pipeline(self, client):
-        assert client._pipeline.on_input_message_received is not None
+        assert client._iothub_pipeline.on_input_message_received is not None
         assert (
-            client._pipeline.on_input_message_received == client._inbox_manager.route_input_message
+            client._iothub_pipeline.on_input_message_received
+            == client._inbox_manager.route_input_message
         )
 
 
@@ -941,7 +945,7 @@ class TestIoTHubModuleClientCreateFromEdgeEnvironmentWithContainerEnv(
         assert mock_auth_init.call_count == 1
         assert mock_pipeline_init.call_count == 1
         assert mock_pipeline_init.call_args == mocker.call(mock_auth_init.return_value)
-        assert client._pipeline == mock_pipeline_init.return_value
+        assert client._iothub_pipeline == mock_pipeline_init.return_value
 
     @pytest.mark.it(
         "Ignores any Edge local debug environment variables that may be present, in favor of using Edge container variables"
@@ -961,7 +965,7 @@ class TestIoTHubModuleClientCreateFromEdgeEnvironmentWithContainerEnv(
         assert mock_auth_init.call_count == 1
         assert mock_pipeline_init.call_count == 1
         assert mock_pipeline_init.call_args == mocker.call(mock_auth_init.return_value)
-        assert client._pipeline == mock_pipeline_init.return_value
+        assert client._iothub_pipeline == mock_pipeline_init.return_value
 
     @pytest.mark.it("Raises IoTEdgeError if the environment is missing required variables")
     @pytest.mark.parametrize(
@@ -1048,7 +1052,7 @@ class TestIoTHubModuleClientCreateFromEdgeEnvironmentWithDebugEnv(IoTHubModuleCl
         assert mock_auth.ca_cert == expected_cert
         assert mock_pipeline_init.call_count == 1
         assert mock_pipeline_init.call_args == mocker.call(mock_auth)
-        assert client._pipeline == mock_pipeline_init.return_value
+        assert client._iothub_pipeline == mock_pipeline_init.return_value
 
     @pytest.mark.it(
         "Only uses Edge local debug variables if no Edge container variables are present in the environment"
@@ -1073,7 +1077,7 @@ class TestIoTHubModuleClientCreateFromEdgeEnvironmentWithDebugEnv(IoTHubModuleCl
         assert mock_auth_init.call_count == 1
         assert mock_pipeline_init.call_count == 1
         assert mock_pipeline_init.call_args == mocker.call(mock_auth_init.return_value)
-        assert client._pipeline == mock_pipeline_init.return_value
+        assert client._iothub_pipeline == mock_pipeline_init.return_value
 
     @pytest.mark.it("Raises IoTEdgeError if the environment is missing required variables")
     @pytest.mark.parametrize(
