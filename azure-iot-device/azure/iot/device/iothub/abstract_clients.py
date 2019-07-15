@@ -12,7 +12,7 @@ import logging
 import os
 import io
 from . import auth
-from .pipeline import IoTHubPipeline, EdgePipeline
+from . import pipeline
 
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class AbstractIoTHubClient(object):
         """
         # TODO: Refactor this to be an iothub_pipeline, and instantiate here instead of
         # in the factory methods
-        self._iothub_pipeline = IoTHubPipeline(auth_provider)
+        self._iothub_pipeline = pipeline.IoTHubPipeline(auth_provider)
 
     @classmethod
     def create_from_connection_string(cls, connection_string, trusted_certificate_chain=None):
@@ -130,7 +130,7 @@ class AbstractIoTHubModuleClient(AbstractIoTHubClient):
         """
         super(AbstractIoTHubModuleClient, self).__init__(auth_provider)
         try:
-            self._edge_pipeline = EdgePipeline(auth_provider)
+            self._edge_pipeline = pipeline.EdgePipeline(auth_provider)
         except ValueError:
             self._edge_pipeline = None
 

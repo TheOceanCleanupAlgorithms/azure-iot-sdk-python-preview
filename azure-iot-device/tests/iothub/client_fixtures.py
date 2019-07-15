@@ -197,7 +197,7 @@ class FakeIoTHubPipeline:
 
 
 @pytest.fixture
-def pipeline(mocker):
+def iothub_pipeline(mocker):
     """This fixture will automatically handle callbacks and should be
     used in the majority of tests.
     """
@@ -205,7 +205,7 @@ def pipeline(mocker):
 
 
 @pytest.fixture
-def pipeline_manual_cb(mocker):
+def iothub_pipeline_manual_cb(mocker):
     """This fixture is for use in tests where manual triggering of a
     callback is required
     """
