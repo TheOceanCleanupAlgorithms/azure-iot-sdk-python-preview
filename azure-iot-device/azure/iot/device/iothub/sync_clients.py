@@ -27,15 +27,16 @@ class GenericIoTHubClient(AbstractIoTHubClient):
     This class needs to be extended for specific clients.
     """
 
-    def __init__(self, auth_provider):
+    def __init__(self, iothub_pipeline):
         """Initializer for a generic synchronous client.
 
         This initializer should not be called directly.
         Instead, use one of the 'create_from_' classmethods to instantiate
 
-        :param auth_provider: The AuthenticationProvider the client will use for credentials
+        :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
+        :type iothub_pipeline: IoTHubPipeline
         """
-        super(GenericIoTHubClient, self).__init__(auth_provider)
+        super(GenericIoTHubClient, self).__init__(iothub_pipeline)
         self._inbox_manager = InboxManager(inbox_type=SyncClientInbox)
         self._iothub_pipeline.on_connected = self._on_connected
         self._iothub_pipeline.on_disconnected = self._on_disconnected
@@ -274,15 +275,16 @@ class IoTHubDeviceClient(GenericIoTHubClient, AbstractIoTHubDeviceClient):
     Intended for usage with Python 2.7 or compatibility scenarios for Python 3.5.3+.
     """
 
-    def __init__(self, auth_provider):
+    def __init__(self, iothub_pipeline):
         """Initializer for a IoTHubDeviceClient.
 
         This initializer should not be called directly.
         Instead, use one of the 'create_from_' classmethods to instantiate
 
-        :param auth_provider: The AuthenticationProvider the client will use for credentials
+        :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
+        :type iothub_pipeline: IoTHubPipeline
         """
-        super(IoTHubDeviceClient, self).__init__(auth_provider)
+        super(IoTHubDeviceClient, self).__init__(iothub_pipeline)
         self._iothub_pipeline.on_c2d_message_received = self._inbox_manager.route_c2d_message
 
     def receive_c2d_message(self, block=True, timeout=None):
@@ -313,15 +315,16 @@ class IoTHubModuleClient(GenericIoTHubClient, AbstractIoTHubModuleClient):
     Intended for usage with Python 2.7 or compatibility scenarios for Python 3.5.3+.
     """
 
-    def __init__(self, auth_provider):
+    def __init__(self, iothub_pipeline):
         """Intializer for a IoTHubModuleClient.
 
         This initializer should not be called directly.
         Instead, use one of the 'create_from_' classmethods to instantiate
 
-        :param auth_provider: The AuthenticationProvider the client will use for credentials
+        :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
+        :type iothub_pipeline: IoTHubPipeline
         """
-        super(IoTHubModuleClient, self).__init__(auth_provider)
+        super(IoTHubModuleClient, self).__init__(iothub_pipeline)
         self._iothub_pipeline.on_input_message_received = self._inbox_manager.route_input_message
 
     def send_to_output(self, message, output_name):
