@@ -216,37 +216,3 @@ def iothub_pipeline_manual_cb(mocker):
     callback is required
     """
     return mocker.MagicMock()
-
-
-"""----Shared Auth Provider Fixtures----"""
-
-
-@pytest.fixture(
-    params=[
-        SymmetricKeyAuthenticationProvider,
-        SharedAccessSignatureAuthenticationProvider,
-        IoTEdgeAuthenticationProvider,
-        X509AuthenticationProvider,
-    ]
-)
-def auth_provider(request, mocker):
-    """Return fake subclasses of each of the different auth types.
-    The motivation here is that there is simply too many different configurations of an AuthenticationProvider,
-    even within the same broad class, to realisitcally test. For instance, there are (at least) 4 different types
-    of SymmetricKeyAuthenticationProviders alone, and their (tehcnical, not practical) validity corresponds specifically
-    to either devices or modules, even though this fixture has to be shared.
-
-    Instead of returning real auth providers, we just return a simplified, dummy version of the broad types.
-    This is valid because this fixture is used for testing instantiation of a client, where the only
-    meaningful aspect of the auth provider is the class type.
-
-    Furthermore, actual real auth providers are tested in the tests on the client factory methods, with all the required
-    intra-AuthenticationProvider cases addressed. To capture that variance in this fixture would be redundant.
-    """
-    auth_class = request.param
-
-    class DummyAuth(auth_class):
-        def __init__(self):
-            pass
-
-    return DummyAuth()

@@ -137,16 +137,16 @@ class AbstractIoTHubDeviceClient(AbstractIoTHubClient):
 @six.add_metaclass(abc.ABCMeta)
 class AbstractIoTHubModuleClient(AbstractIoTHubClient):
     # TODO: move this logic? I dont think this ever runs
-    def __init__(self, iothub_pipeline, edge_pipeline=None):
-        """Initializer for a module client.
+    # def __init__(self, iothub_pipeline, edge_pipeline=None):
+    #     """Initializer for a module client.
 
-        :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
-        :type iothub_pipeline: IoTHubPipeline
-        :param edge_pipeline: (OPTIONAL) The pipeline used to connect to the Edge endpoint.
-        :type edge_pipeline: EdgePipeline
-        """
-        super(AbstractIoTHubModuleClient, self).__init__(iothub_pipeline)
-        self._edge_pipeline = edge_pipeline
+    #     :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
+    #     :type iothub_pipeline: IoTHubPipeline
+    #     :param edge_pipeline: (OPTIONAL) The pipeline used to connect to the Edge endpoint.
+    #     :type edge_pipeline: EdgePipeline
+    #     """
+    #     super(AbstractIoTHubModuleClient, self).__init__(iothub_pipeline)
+    #     self._edge_pipeline = edge_pipeline
 
     @classmethod
     def create_from_edge_environment(cls):
@@ -209,8 +209,8 @@ class AbstractIoTHubModuleClient(AbstractIoTHubClient):
                 api_version=api_version,
             )
         iothub_pipeline = pipeline.IoTHubPipeline(authentication_provider)
-        edge_pipeline = pipeline.EdgePipeline(authentication_provider)
-        return cls(iothub_pipeline, edge_pipeline=edge_pipeline)
+        # edge_pipeline = pipeline.EdgePipeline(authentication_provider)
+        return cls(iothub_pipeline)
 
     @classmethod
     def create_from_x509_certificate(cls, x509, hostname, device_id, module_id):
