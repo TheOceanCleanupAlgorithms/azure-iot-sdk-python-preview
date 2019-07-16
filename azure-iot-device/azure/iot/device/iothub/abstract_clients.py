@@ -27,9 +27,8 @@ class AbstractIoTHubClient(object):
 
         :param auth_provider: The AuthenticationProvider the client will use for credentials
         """
-        # TODO: Refactor this to be an iothub_pipeline, and instantiate here instead of
-        # in the factory methods
         self._iothub_pipeline = pipeline.IoTHubPipeline(auth_provider)
+        self._edge_pipeline = None
 
     @classmethod
     def create_from_connection_string(cls, connection_string, trusted_certificate_chain=None):

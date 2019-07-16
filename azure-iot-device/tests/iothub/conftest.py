@@ -9,6 +9,7 @@ import pytest
 
 # These fixtures are shared between sync and async clients
 from .client_fixtures import (
+    auth_provider,
     message,
     method_response,
     method_request,

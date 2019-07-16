@@ -29,18 +29,47 @@ async def create_completed_future(result=None):
 
 
 class SharedClientInstantiationTests(object):
-    @pytest.mark.it("Sets on_connected handler in pipeline")
-    async def test_sets_on_connected_handler_in_pipeline(self, client):
+    @pytest.mark.it("Creates an IoTHubPipeline using the given AuthenticationProvider")
+    async def test_creates_iothub_pipeline(
+        self, mocker, client_class, auth_provider, iothub_pipeline
+    ):
+        iothub_pipeline_init_mock = mocker.patch("azure.iot.device.iothub.pipeline.IoTHubPipeline")
+        iothub_pipeline_init_mock.return_value = iothub_pipeline
+        client = client_class(auth_provider)
+
+        assert iothub_pipeline_init_mock.call_count == 1
+        assert client._iothub_pipeline is iothub_pipeline
+
+    @pytest.mark.it("Sets on_connected handler in the IoTHubPipeline")
+    async def test_sets_on_connected_handler_in_pipeline(
+        self, mocker, client_class, auth_provider, iothub_pipeline
+    ):
+        iothub_pipeline_init_mock = mocker.patch("azure.iot.device.iothub.pipeline.IoTHubPipeline")
+        iothub_pipeline_init_mock.return_value = iothub_pipeline
+        client = client_class(auth_provider)
+
         assert client._iothub_pipeline.on_connected is not None
         assert client._iothub_pipeline.on_connected == client._on_connected
 
-    @pytest.mark.it("Sets on_disconnected handler in pipeline")
-    async def test_sets_on_disconnected_handler_in_pipeline(self, client):
+    @pytest.mark.it("Sets on_disconnected handler in the IoTHubPipeline")
+    async def test_sets_on_disconnected_handler_in_pipeline(
+        self, mocker, client_class, auth_provider, iothub_pipeline
+    ):
+        iothub_pipeline_init_mock = mocker.patch("azure.iot.device.iothub.pipeline.IoTHubPipeline")
+        iothub_pipeline_init_mock.return_value = iothub_pipeline
+        client = client_class(auth_provider)
+
         assert client._iothub_pipeline.on_disconnected is not None
         assert client._iothub_pipeline.on_disconnected == client._on_disconnected
 
-    @pytest.mark.it("Sets on_method_request_eeceived handler in pipeline")
-    async def test_sets_on_method_request_received_handler_in_pipleline(self, client):
+    @pytest.mark.it("Sets on_method_request_received handler in the IoTHubPipeline")
+    async def test_sets_on_method_request_received_handler_in_pipleline(
+        self, mocker, client_class, auth_provider, iothub_pipeline
+    ):
+        iothub_pipeline_init_mock = mocker.patch("azure.iot.device.iothub.pipeline.IoTHubPipeline")
+        iothub_pipeline_init_mock.return_value = iothub_pipeline
+        client = client_class(auth_provider)
+
         assert client._iothub_pipeline.on_method_request_received is not None
         assert (
             client._iothub_pipeline.on_method_request_received
@@ -563,8 +592,14 @@ class IoTHubDeviceClientTestsConfig(object):
 class TestIoTHubDeviceClientInstantiation(
     IoTHubDeviceClientTestsConfig, SharedClientInstantiationTests
 ):
-    @pytest.mark.it("Sets on_c2d_message_received handler in pipeline")
-    async def test_sets_on_c2d_message_received_handler_in_pipeline(self, client):
+    @pytest.mark.it("Sets on_c2d_message_received handler in the IoTHubPipeline")
+    async def test_sets_on_c2d_message_received_handler_in_pipeline(
+        self, mocker, client_class, auth_provider, iothub_pipeline
+    ):
+        iothub_pipeline_init_mock = mocker.patch("azure.iot.device.iothub.pipeline.IoTHubPipeline")
+        iothub_pipeline_init_mock.return_value = iothub_pipeline
+        client = client_class(auth_provider)
+
         assert client._iothub_pipeline.on_c2d_message_received is not None
         assert (
             client._iothub_pipeline.on_c2d_message_received
@@ -721,8 +756,14 @@ class IoTHubModuleClientTestsConfig(object):
 class TestIoTHubModuleClientInstantiation(
     IoTHubModuleClientTestsConfig, SharedClientInstantiationTests
 ):
-    @pytest.mark.it("Sets on_input_message_received handler in pipeline")
-    async def test_sets_on_input_message_received_handler_in_pipeline(self, client):
+    @pytest.mark.it("Sets on_input_message_received handler in the IoTHubPipeline")
+    async def test_sets_on_input_message_received_handler_in_pipeline(
+        self, mocker, client_class, auth_provider, iothub_pipeline
+    ):
+        iothub_pipeline_init_mock = mocker.patch("azure.iot.device.iothub.pipeline.IoTHubPipeline")
+        iothub_pipeline_init_mock.return_value = iothub_pipeline
+        client = client_class(auth_provider)
+
         assert client._iothub_pipeline.on_input_message_received is not None
         assert (
             client._iothub_pipeline.on_input_message_received
