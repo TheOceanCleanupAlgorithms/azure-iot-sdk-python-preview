@@ -1,5 +1,12 @@
 name: ReleaseBuild_$(BuildID)_$(Date:yyyyMMdd)$(Rev:.r)
 
+schedules:
+- cron: "0 8 * * Mon-Fri" # cron syntax defining a schedule
+  displayName: "Daily Release Pipeline Test"
+  branches:
+    include: [ move-script ] # which branches the schedule applies to
+  always: true # whether to always run the pipeline or only if there have been source code changes since the last run. The default is false.
+
 steps:
 
 - task: DownloadBuildArtifacts@0
