@@ -27,16 +27,20 @@ class GenericIoTHubClient(AbstractIoTHubClient):
     This class needs to be extended for specific clients.
     """
 
-    def __init__(self, iothub_pipeline):
+    def __init__(self, **kwargs):
         """Initializer for a generic asynchronous client.
 
         This initializer should not be called directly.
         Instead, use one of the 'create_from_' classmethods to instantiate
 
-        :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
-        :type iothub_pipeline: IoTHubPipeline
+        TODO: How to document kwargs?
+        Possible values: iothub_pipeline, edge_pipeline
         """
-        super().__init__(iothub_pipeline)
+        # Depending on the subclass calling this __init__, there could be different arguments,
+        # and the super() call could call a different class, due to the different MROs
+        # in the class hierarchies of different clients. Thus, args here must be passed along as
+        # **kwargs.
+        super().__init__(**kwargs)
         self._inbox_manager = InboxManager(inbox_type=AsyncClientInbox)
         self._iothub_pipeline.on_connected = self._on_connected
         self._iothub_pipeline.on_disconnected = self._on_disconnected
@@ -254,7 +258,7 @@ class IoTHubDeviceClient(GenericIoTHubClient, AbstractIoTHubDeviceClient):
         :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
         :type iothub_pipeline: IoTHubPipeline
         """
-        super().__init__(iothub_pipeline)
+        super().__init__(iothub_pipeline=iothub_pipeline)
         self._iothub_pipeline.on_c2d_message_received = self._inbox_manager.route_c2d_message
 
     async def receive_c2d_message(self):
@@ -280,7 +284,7 @@ class IoTHubModuleClient(GenericIoTHubClient, AbstractIoTHubModuleClient):
     Intended for usage with Python 3.5.3+
     """
 
-    def __init__(self, iothub_pipeline):
+    def __init__(self, iothub_pipeline, edge_pipeline=None):
         """Intializer for a IoTHubModuleClient.
 
         This initializer should not be called directly.
@@ -288,8 +292,10 @@ class IoTHubModuleClient(GenericIoTHubClient, AbstractIoTHubModuleClient):
 
         :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
         :type iothub_pipeline: IoTHubPipeline
+        :param edge_pipeline: (OPTIONAL) The pipeline used to connect to the Edge endpoint.
+        :type edge_pipeline: EdgePipeline
         """
-        super().__init__(iothub_pipeline)
+        super().__init__(iothub_pipeline=iothub_pipeline, edge_pipeline=edge_pipeline)
         self._iothub_pipeline.on_input_message_received = self._inbox_manager.route_input_message
 
     async def send_to_output(self, message, output_name):

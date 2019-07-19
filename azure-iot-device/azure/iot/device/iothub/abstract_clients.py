@@ -42,13 +42,13 @@ class AbstractIoTHubClient(object):
         self._edge_pipeline = None
 
     @classmethod
-    def create_from_connection_string(cls, connection_string, trusted_certificate_chain=None):
+    def create_from_connection_string(cls, connection_string, ca_cert=None):
         """
         Instantiate the client from a IoTHub device or module connection string.
 
         :param str connection_string: The connection string for the IoTHub you wish to connect to.
-        :param str trusted_certificate_chain: The trusted certificate chain. Necessary when using a
-        connection string with a GatewayHostName parameter. DEFAULT: None
+        :param str ca_cert: (OPTIONAL) The trusted certificate chain. Necessary when using a
+        connection string with a GatewayHostName parameter.
 
         :raises: ValueError if given an invalid connection_string.
         """
@@ -56,9 +56,7 @@ class AbstractIoTHubClient(object):
         # This will require refactoring of the auth package to use common objects (e.g. ConnectionString)
         # in order to differentiate types of connection strings.
         authentication_provider = auth.SymmetricKeyAuthenticationProvider.parse(connection_string)
-        authentication_provider.ca_cert = (
-            trusted_certificate_chain
-        )  # TODO: make this part of the instantiation
+        authentication_provider.ca_cert = ca_cert  # TODO: make this part of the instantiation
         iothub_pipeline = pipeline.IoTHubPipeline(authentication_provider)
         return cls(iothub_pipeline)
 
@@ -136,17 +134,16 @@ class AbstractIoTHubDeviceClient(AbstractIoTHubClient):
 
 @six.add_metaclass(abc.ABCMeta)
 class AbstractIoTHubModuleClient(AbstractIoTHubClient):
-    # TODO: move this logic? I dont think this ever runs
-    # def __init__(self, iothub_pipeline, edge_pipeline=None):
-    #     """Initializer for a module client.
+    def __init__(self, iothub_pipeline, edge_pipeline=None):
+        """Initializer for a module client.
 
-    #     :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
-    #     :type iothub_pipeline: IoTHubPipeline
-    #     :param edge_pipeline: (OPTIONAL) The pipeline used to connect to the Edge endpoint.
-    #     :type edge_pipeline: EdgePipeline
-    #     """
-    #     super(AbstractIoTHubModuleClient, self).__init__(iothub_pipeline)
-    #     self._edge_pipeline = edge_pipeline
+        :param iothub_pipeline: The pipeline used to connect to the IoTHub endpoint.
+        :type iothub_pipeline: IoTHubPipeline
+        :param edge_pipeline: (OPTIONAL) The pipeline used to connect to the Edge endpoint.
+        :type edge_pipeline: EdgePipeline
+        """
+        super(AbstractIoTHubModuleClient, self).__init__(iothub_pipeline)
+        self._edge_pipeline = edge_pipeline
 
     @classmethod
     def create_from_edge_environment(cls):
@@ -179,6 +176,7 @@ class AbstractIoTHubModuleClient(AbstractIoTHubClient):
                 # TODO: consider using a different error here. (OSError?)
                 raise auth.IoTEdgeError("IoT Edge environment not configured correctly")
 
+            # TODO: variant ca_cert file vs data object that would remove the need for this fopen
             # Read the certificate file to pass it on as a string
             try:
                 with io.open(ca_cert_filepath, mode="r") as ca_cert_file:
@@ -209,8 +207,8 @@ class AbstractIoTHubModuleClient(AbstractIoTHubClient):
                 api_version=api_version,
             )
         iothub_pipeline = pipeline.IoTHubPipeline(authentication_provider)
-        # edge_pipeline = pipeline.EdgePipeline(authentication_provider)
-        return cls(iothub_pipeline)
+        edge_pipeline = pipeline.EdgePipeline(authentication_provider)
+        return cls(iothub_pipeline, edge_pipeline=edge_pipeline)
 
     @classmethod
     def create_from_x509_certificate(cls, x509, hostname, device_id, module_id):

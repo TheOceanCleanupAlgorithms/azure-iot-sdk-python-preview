@@ -216,3 +216,8 @@ def iothub_pipeline_manual_cb(mocker):
     callback is required
     """
     return mocker.MagicMock()
+
+
+@pytest.fixture
+def edge_pipeline(mocker):
+    return mocker.MagicMock()  # TODO: change this to wrap a pipeline object
