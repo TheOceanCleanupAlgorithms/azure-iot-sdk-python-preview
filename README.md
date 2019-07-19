@@ -1,4 +1,9 @@
-![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/python/python-preview)
+
+
+| Pipeline | Status |
+| :---|:---|
+| Build | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/python/python-preview) |
+| Release | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/release/python-release?branchName=move-script) |
 
 # Azure IoT Hub Python SDKs v2 - PREVIEW
 
