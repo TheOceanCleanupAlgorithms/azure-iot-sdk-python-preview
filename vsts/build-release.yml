@@ -33,6 +33,19 @@ steps:
     dist: $(System.ArtifactsDirectory)\dist
     sources: $(Build.SourcesDirectory)
     device_version_part: $(azure-iot-device-version-part)
+    nspkg_version_part: 
+  displayName: 'build release artifacts'
+
+- task: UsePythonVersion@0
+  displayName: 'Use Python 2.x'
+
+- task: PowerShell@2
+  inputs:
+    filePath: $(Build.SourcesDirectory)\scripts\build-release.ps1
+  env:
+    dist: $(System.ArtifactsDirectory)\dist\2x
+    sources: $(Build.SourcesDirectory)
+    device_version_part: 
     nspkg_version_part: $(azure-iot-nspkg-version-part)
   displayName: 'build release artifacts'
 
