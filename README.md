@@ -1,11 +1,16 @@
 
 
-| Pipeline | Status |
-| :---|:---|
-| Build | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/python/python-preview) |
-| Release | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/release/python-release?branchName=move-script) |
-
 # Azure IoT Hub Python SDKs v2 - PREVIEW
+
+### Build Status
+
+| Pipeline | Status |
+| :---|---:|
+| Build | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/python/python-preview) |
+| Release | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/release/python-release?branchName=master) |
+| [Production](https://pypi.org/search/?q=azure-iot) | ![Build Status](https://azure-iot-sdks.vsrm.visualstudio.com/_apis/public/Release/badge/f9b79625-2860-4d92-a4ee-57b03fabfd10/20/22) |
+| [Canary](https://test.pypi.org/search/?q=azure-iot) | ![Build Status](https://azure-iot-sdks.vsrm.visualstudio.com/_apis/public/Release/badge/f9b79625-2860-4d92-a4ee-57b03fabfd10/28/30)
+
 
 This repository contains the code for the future v2.0.0 of the Azure IoT SDKs for Python. The goal of v2.0.0 is to be a complete rewrite of the existing SDK that maximizes the use of the Python language and its standard features rather than wrap over the C SDK, like v1.x.x of the SDK did.
 
