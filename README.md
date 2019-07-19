@@ -1,10 +1,9 @@
-### Build Status
 
 | Pipeline | Status |
-| :---|---:|
+| :---|:---|
 | Build | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/python/python-preview) |
 | Release | ![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/release/python-release?branchName=master) |
-| [Production](https://pypi.org/search/?q=azure-iot) | ![Build Status](https://azure-iot-sdks.vsrm.visualstudio.com/_apis/public/Release/badge/f9b79625-2860-4d92-a4ee-57b03fabfd10/20/22) |
+| [Deploy](https://pypi.org/search/?q=azure-iot) | ![Build Status](https://azure-iot-sdks.vsrm.visualstudio.com/_apis/public/Release/badge/f9b79625-2860-4d92-a4ee-57b03fabfd10/20/22) |
 
 # Azure IoT Hub Python SDKs v2 - PREVIEW
 
