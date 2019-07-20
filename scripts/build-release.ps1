@@ -14,7 +14,7 @@ function Build-Python {
 
 function Build-Python2x {
     pip install virtualenvwrapper-win
-    mkvirtualenv --python=$(GetPython2x) python2-64
+    mkvirtualenv --python=$(Get-Python2x) python2-64
     workon python2-64
     python setup.py bdist_wheel
     rmvirtualenv python2-64
