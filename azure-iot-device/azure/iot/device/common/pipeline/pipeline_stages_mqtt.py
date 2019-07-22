@@ -18,7 +18,7 @@ from azure.iot.device.common.mqtt_transport import MQTTTransport
 logger = logging.getLogger(__name__)
 
 
-class MQTTClientStage(PipelineStage):
+class MQTTTransportStage(PipelineStage):
     """
     PipelineStage object which is responsible for interfacing with the MQTT protocol wrapper object.
     This stage handles all MQTT operations and any other operations (such as ConnectOperation) which
@@ -186,8 +186,8 @@ class MQTTClientStage(PipelineStage):
 
     @pipeline_thread.invoke_on_pipeline_thread_nowait
     def on_connected(self):
-        super(MQTTClientStage, self).on_connected()
+        super(MQTTTransportStage, self).on_connected()
 
     @pipeline_thread.invoke_on_pipeline_thread_nowait
     def on_disconnected(self):
-        super(MQTTClientStage, self).on_disconnected()
+        super(MQTTTransportStage, self).on_disconnected()
