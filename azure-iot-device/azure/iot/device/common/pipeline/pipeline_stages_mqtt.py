@@ -36,7 +36,7 @@ class MQTTClientStage(PipelineStage):
             self.client_id = op.client_id
             self.ca_cert = op.ca_cert
             self.sas_token = None
-            self.ca_cert = None
+            self.client_cert = None
             self.transport = MQTTTransport(
                 client_id=self.client_id,
                 hostname=self.hostname,
@@ -58,7 +58,7 @@ class MQTTClientStage(PipelineStage):
         elif isinstance(op, pipeline_ops_base.SetClientAuthenticationCertificateOperation):
             # When we get a certificate from above, we just save it for later
             logger.info("{}({}): got certificate".format(self.name, op.name))
-            self.ca_cert = op.certificate
+            self.client_cert = op.certificate
             operation_flow.complete_op(self, op)
 
         elif isinstance(op, pipeline_ops_base.ConnectOperation):
@@ -99,7 +99,7 @@ class MQTTClientStage(PipelineStage):
             #
             self.transport.on_mqtt_connected = on_connected
             try:
-                self.transport.connect(password=self.sas_token, client_certificate=self.ca_cert)
+                self.transport.connect(password=self.sas_token, client_certificate=self.client_cert)
             except Exception as e:
                 self.transport.on_mqtt_connected = self.on_connected
                 raise e
