@@ -22,6 +22,12 @@ steps:
 - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
   persistCredentials: 'true'  # set to 'true' to leave the OAuth token in the Git config after the initial fetch
   clean: 'resources'
+  
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+    addToPath: true
+    architecture: 'x64'
 
 - task: PowerShell@2
   inputs:
