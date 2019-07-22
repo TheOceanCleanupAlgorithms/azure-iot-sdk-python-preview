@@ -465,7 +465,7 @@ class TestDisconnect(object):
         mock_provisioning_pipeline.wait_for_on_connected_to_be_called()
 
         mock_provisioning_pipeline.disconnect()
-        mock_mqtt_transport.on_mqtt_disconnected()
+        mock_mqtt_transport.on_mqtt_disconnected(None)
 
         mock_provisioning_pipeline.wait_for_on_disconnected_to_be_called()
         mock_provisioning_pipeline.on_disconnected.assert_called_once_with("disconnected")

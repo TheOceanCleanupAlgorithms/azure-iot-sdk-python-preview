@@ -68,7 +68,12 @@ pipeline_stage_test.add_base_pipeline_stage_tests(
     handled_ops=ops_handled_by_this_stage,
     all_events=all_common_events,
     handled_events=events_handled_by_this_stage,
-    methods_that_enter_pipeline_thread=["_on_message_received", "on_connected", "on_disconnected"],
+    methods_that_enter_pipeline_thread=[
+        "_on_message_received",
+        "_on_unexpected_connection",
+        "_on_unexpected_connection_failure",
+        "_on_unexpected_disconnection",
+    ],
 )
 
 
@@ -82,8 +87,9 @@ def stage(mocker):
     stage.pipeline_root = root
 
     mocker.spy(root, "handle_pipeline_event")
-    mocker.spy(stage, "on_connected")
-    mocker.spy(stage, "on_disconnected")
+    mocker.spy(stage, "_on_unexpected_connection")
+    mocker.spy(stage, "_on_unexpected_connection_failure")
+    mocker.spy(stage, "_on_unexpected_disconnection")
 
     return stage
 
@@ -133,8 +139,12 @@ class TestMQTTProviderRunOpWithSetConnectionArgs(object):
     )
     def test_sets_parameters(self, stage, transport, mocker, op_set_connection_args):
         stage.run_op(op_set_connection_args)
-        assert transport.return_value.on_mqtt_disconnected == stage.on_disconnected
-        assert transport.return_value.on_mqtt_connected == stage.on_connected
+        assert transport.return_value.on_mqtt_disconnected == stage._on_unexpected_disconnection
+        assert transport.return_value.on_mqtt_connected == stage._on_unexpected_connection
+        assert (
+            transport.return_value.on_mqtt_connection_failure
+            == stage._on_unexpected_connection_failure
+        )
         assert transport.return_value.on_mqtt_message_received == stage._on_message_received
 
     @pytest.mark.it("Sets the transport attribute on the root of the pipeline")
@@ -196,6 +206,7 @@ connection_ops = [
             "transport_function": "connect",
             "transport_kwargs": {},
             "transport_handler": "on_mqtt_connected",
+            "transport_handler_args": [],
         },
         id="ConnectOperation",
     ),
@@ -206,6 +217,7 @@ connection_ops = [
             "transport_function": "disconnect",
             "transport_kwargs": {},
             "transport_handler": "on_mqtt_disconnected",
+            "transport_handler_args": [None],
         },
         id="Disconnect",
     ),
@@ -216,6 +228,7 @@ connection_ops = [
             "transport_function": "reconnect",
             "transport_kwargs": {},
             "transport_handler": "on_mqtt_connected",
+            "transport_handler_args": [],
         },
         id="Reconnect",
     ),
@@ -265,7 +278,7 @@ def transport_function_succeeds(params, stage):
         if "callback" in kwargs:
             kwargs["callback"]()
         elif "transport_handler" in params:
-            getattr(stage.transport, params["transport_handler"])()
+            getattr(stage.transport, params["transport_handler"])(*params["transport_handler_args"])
         else:
             assert False
 
@@ -429,5 +442,5 @@ class TestMQTTProviderOnDisconnected(object):
     def test_disconnected_handler(self, stage, create_transport, mocker):
         mocker.spy(stage.previous, "on_disconnected")
         assert stage.previous.on_disconnected.call_count == 0
-        stage.transport.on_mqtt_disconnected()
+        stage.transport.on_mqtt_disconnected(None)
         assert stage.previous.on_disconnected.call_count == 1

@@ -9,7 +9,7 @@ import logging
 import ssl
 import threading
 import traceback
-import errors
+from . import errors
 
 logger = logging.getLogger(__name__)
 
