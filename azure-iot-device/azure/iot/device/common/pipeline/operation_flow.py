@@ -229,7 +229,6 @@ def pass_op_to_next_stage(stage, op):
         stage.next.run_op(op)
 
 
-@pipeline_thread.runs_on_pipeline_thread
 def complete_op(stage, op):
     """
     Helper function to complete an operation by calling its callback function thus

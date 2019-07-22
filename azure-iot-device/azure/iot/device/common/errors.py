@@ -149,3 +149,11 @@ class TransportError(Exception):
     """
 
     pass
+
+
+class PipelineError(Exception):
+    """
+    Error returned from transport pipeline
+    """
+
+    pass
