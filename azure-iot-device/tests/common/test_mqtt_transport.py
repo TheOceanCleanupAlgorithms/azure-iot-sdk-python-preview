@@ -98,7 +98,7 @@ class TestInstantiation(object):
         assert transport._op_manager._unknown_operation_completions == {}
 
 
-@pytest.mark.describe("MQTTTransport - .connect()")
+@pytest.mark.describe("MQTTTransport - .connect() / Event: Connected")
 class TestConnect(object):
     @pytest.mark.it("Configures TLS/SSL context")
     def test_configures_tls_context(self, mocker, mock_mqtt_client, transport):
@@ -251,6 +251,14 @@ class TestConnect(object):
                 client=mock_mqtt_client, userdata=None, flags=None, rc=fake_rc
             )
 
+    @pytest.mark.it("Raises an Exception if connect returns a failing rc code")
+    def test_transport_returns_failing_rc_code(self):
+        raise Exception()
+
+# TODO: flush out tests with error mapping
+# TODO: callback for on_connected and on_connection_failed 
+# TODO: make sure we have a test for callback for on_disconnected with failure.  
+
 
 @pytest.mark.describe("MQTTTransport - .reconnect() / EVENT: Reconnect")
 class TestReconnect(object):
@@ -342,6 +350,10 @@ class TestReconnect(object):
                 client=mock_mqtt_client, userdata=None, flags=None, rc=fake_rc
             )
 
+    @pytest.mark.it("Raises an Exception if reconnect returns a failing rc code")
+    def test_transport_returns_failing_rc_code(self):
+        raise Exception()
+
 
 @pytest.mark.describe("MQTTTransport - .disconnect() / EVENT: Disconnect")
 class TestDisconnect(object):
@@ -431,6 +443,11 @@ class TestDisconnect(object):
         transport.disconnect()
         with pytest.raises(UnhandledException):
             mock_mqtt_client.on_disconnect(client=mock_mqtt_client, userdata=None, rc=fake_rc)
+
+    @pytest.mark.it("Raises an Exception if disconnect returns a failing rc code")
+    def test_transport_returns_failing_rc_code(self):
+        raise Exception()
+
 
 
 @pytest.mark.describe("MQTTTransport - .subscribe()")
@@ -672,6 +689,10 @@ class TestSubscribe(object):
         with pytest.raises(UnhandledException):
             transport.subscribe(topic=fake_topic, qos=fake_qos, callback=callback)
 
+    @pytest.mark.it("Raises an Exception if subscribe returns a failing rc code")
+    def test_transport_returns_failing_rc_code(self):
+        raise Exception()
+
 
 @pytest.mark.describe("MQTTTransport - .unsubscribe()")
 class TestUnsubscribe(object):
@@ -881,6 +902,10 @@ class TestUnsubscribe(object):
         # Initiate unsubscribe
         with pytest.raises(UnhandledException):
             transport.unsubscribe(topic=fake_topic, callback=callback)
+
+    @pytest.mark.it("Raises an Exception if unsubscribe returns a failing rc code")
+    def test_transport_returns_failing_rc_code(self):
+        raise Exception()
 
 
 @pytest.mark.describe("MQTTTransport - .publish()")
@@ -1142,6 +1167,11 @@ class TestPublish(object):
         # Initiate publish
         with pytest.raises(UnhandledException):
             transport.publish(topic=fake_topic, payload=fake_payload, callback=callback)
+
+    @pytest.mark.it("Raises an Exception if publish returns a failing rc code")
+    def test_transport_returns_failing_rc_code(self):
+        raise Exception()
+
 
 
 @pytest.mark.describe("MQTTTransport - EVENT: Message Received")
