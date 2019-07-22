@@ -67,4 +67,8 @@ steps:
       publishLocation: 'Container'
   enabled: 'true'
 
-
+- task: CmdLine@2
+  inputs:
+    script: |
+      cd $(Build.SourcesDirectory)
+      tree /f /a
