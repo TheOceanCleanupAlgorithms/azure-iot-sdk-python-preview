@@ -9,9 +9,53 @@ import logging
 import ssl
 import threading
 import traceback
-from . import error_map_paho
+import errors
 
 logger = logging.getLogger(__name__)
+
+# mapping of Paho conack rc codes to Error object classes
+paho_conack_rc_to_error = {
+    mqtt.CONNACK_REFUSED_PROTOCOL_VERSION: errors.TransportError,
+    mqtt.CONNACK_REFUSED_IDENTIFIER_REJECTED: errors.TransportError,
+    mqtt.CONNACK_REFUSED_SERVER_UNAVAILABLE: errors.ConnectionFailedError,
+    mqtt.CONNACK_REFUSED_BAD_USERNAME_PASSWORD: errors.UnauthorizedError,
+    mqtt.CONNACK_REFUSED_NOT_AUTHORIZED: errors.UnauthorizedError,
+}
+
+# mapping of Paho rc codes to Error object classes
+paho_rc_to_error = {
+    mqtt.MQTT_ERR_NOMEM: errors.TransportError,
+    mqtt.MQTT_ERR_PROTOCOL: errors.TransportError,
+    mqtt.MQTT_ERR_INVAL: errors.ArgumentError,
+    mqtt.MQTT_ERR_NO_CONN: errors.ConnectionDroppedError,
+    mqtt.MQTT_ERR_CONN_REFUSED: errors.ConnectionFailedError,
+    mqtt.MQTT_ERR_NOT_FOUND: errors.ConnectionFailedError,
+    mqtt.MQTT_ERR_CONN_LOST: errors.ConnectionDroppedError,
+    mqtt.MQTT_ERR_TLS: errors.UnauthorizedError,
+    mqtt.MQTT_ERR_PAYLOAD_SIZE: errors.TransportError,
+    mqtt.MQTT_ERR_NOT_SUPPORTED: errors.TransportError,
+    mqtt.MQTT_ERR_AUTH: errors.UnauthorizedError,
+    mqtt.MQTT_ERR_ACL_DENIED: errors.UnauthorizedError,
+    mqtt.MQTT_ERR_UNKNOWN: errors.TransportError,
+    mqtt.MQTT_ERR_ERRNO: errors.TransportError,
+    mqtt.MQTT_ERR_QUEUE_SIZE: errors.TransportError,
+}
+
+
+def create_error_from_conack_rc_code(rc):
+    message = mqtt.conack_string(rc)
+    if rc in paho_conack_rc_to_error:
+        return paho_conack_rc_to_error[rc](message)
+    else:
+        return errors.TransportError("Unknown CONACK rc={}".format(rc))
+
+
+def create_error_from_rc_code(rc):
+    message = mqtt.error_string(rc)
+    if rc in paho_rc_to_error:
+        return paho_rc_to_error[rc](message)
+    else:
+        return errors.TransportError("Unknown CONACK rc={}".format(rc))
 
 
 class MQTTTransport(object):
@@ -68,9 +112,7 @@ class MQTTTransport(object):
             if rc:
                 if self.on_mqtt_connection_failure:
                     try:
-                        self.on_mqtt_connection_failure(
-                            error_map_paho.create_error_from_conack_rc_code(rc)
-                        )
+                        self.on_mqtt_connection_failure(create_error_from_conack_rc_code(rc))
                     except Exception:
                         logger.error("Unexpected error calling on_mqtt_connection_failure")
                         logger.error(traceback.format_exc())
@@ -92,7 +134,7 @@ class MQTTTransport(object):
 
             cause = None
             if rc:
-                cause = error_map_paho.crate_transport_error_from_rc_code(rc)
+                cause = create_error_from_rc_code(rc)
 
             if self.on_mqtt_disconnected:
                 try:
@@ -182,12 +224,10 @@ class MQTTTransport(object):
         self._mqtt_client.tls_insecure_set(False)
         self._mqtt_client.username_pw_set(username=self._username, password=password)
 
-        self._mqtt_client.loop_start()
-        rc = self._mqtt_client.connect(host=self._hostname, port=8884)
+        rc = self._mqtt_client.connect(host=self._hostname, port=8883)
         if rc:
-            raise error_map_paho.create_error_from_rc_code(
-                rc, "mqtt_client.connect returned rc={}".format(rc)
-            )
+            raise create_error_from_rc_code(rc)
+        self._mqtt_client.loop_start()
 
     def reconnect(self, password):
         """
@@ -201,9 +241,7 @@ class MQTTTransport(object):
         self._mqtt_client.username_pw_set(username=self._username, password=password)
         rc = self._mqtt_client.reconnect()
         if rc:
-            raise error_map_paho.create_error_from_rc_code(
-                rc, "mqtt_client.reconnect returned rc={}".format(rc)
-            )
+            raise create_error_from_rc_code(rc)
 
     def disconnect(self):
         """
@@ -213,9 +251,7 @@ class MQTTTransport(object):
         rc = self._mqtt_client.disconnect()
         self._mqtt_client.loop_stop()
         if rc:
-            raise error_map_paho.create_error_from_rc_code(
-                rc, "mqtt_client.disconnect returned rc={}".format(rc)
-            )
+            raise create_error_from_rc_code(rc)
 
     def subscribe(self, topic, qos=1, callback=None):
         """
@@ -232,9 +268,7 @@ class MQTTTransport(object):
         logger.info("subscribing to {} with qos {}".format(topic, qos))
         (rc, mid) = self._mqtt_client.subscribe(topic, qos=qos)
         if rc:
-            raise error_map_paho.create_error_from_rc_code(
-                rc, "mqtt_client.subscribe returned rc={}".format(rc)
-            )
+            raise create_error_from_rc_code(rc)
         self._op_manager.establish_operation(mid, callback)
 
     def unsubscribe(self, topic, callback=None):
@@ -249,9 +283,7 @@ class MQTTTransport(object):
         logger.info("unsubscribing from {}".format(topic))
         (rc, mid) = self._mqtt_client.unsubscribe(topic)
         if rc:
-            raise error_map_paho.create_error_from_rc_code(
-                rc, "mqtt_client.unsubscribe returned rc={}".format(rc)
-            )
+            raise create_error_from_rc_code(rc)
         self._op_manager.establish_operation(mid, callback)
 
     def publish(self, topic, payload, qos=1, callback=None):
@@ -271,9 +303,7 @@ class MQTTTransport(object):
         logger.info("sending")
         (rc, mid) = self._mqtt_client.publish(topic=topic, payload=payload, qos=qos)
         if rc:
-            raise error_map_paho.create_error_from_rc_code(
-                rc, "mqtt_client.unsubscribe returned rc={}".format(rc)
-            )
+            raise create_error_from_rc_code(rc)
         self._op_manager.establish_operation(mid, callback)
 
 
