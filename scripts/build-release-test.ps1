@@ -6,19 +6,19 @@ $env:dist = "D:\dist"
 
 . $(Join-Path $PSScriptRoot build-release.ps1)
 
-function BumpVersion($part) {
+function Update-Version($part) {
     # disabled
 }
 
- function PipInstall {
+ function Install-Bumpversion {
     # disabled
  }
  
- function PythonSetup {
+ function Invoke-Python {
     # disabled
  }
  
- function Python2x {
+ function Invoke-Python2x {
     # disabled
  }
 

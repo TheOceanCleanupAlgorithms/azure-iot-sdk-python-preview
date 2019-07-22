@@ -1,4 +1,6 @@
-function PipInstall {
+#$WhatIfPreference = $true
+
+function Install-Bumpversion {
     pip install bumpversion
     pip install wheel
 }
@@ -7,12 +9,12 @@ function Update-Version($part) {
     bumpversion.exe $part --config-file .\.bumpverion.cfg --allow-dirty .\setup.py
 }
 
-function Build-Python {
+function Invoke-Python {
     python setup.py sdist
     python setup.py bdist_wheel
 }
 
-function Build-Python2x {
+function Invoke-Python2x {
     pip install virtualenvwrapper-win
     $py2 = "C:\Python27amd64\python.exe"
     mkvirtualenv --python=$py2 python2-64
@@ -31,33 +33,29 @@ function Build {
     $packages = @{ }
     $packages["azure-iot-device"] = $env:device_version_part
     $packages["azure-iot-nspkg"] = $env:nspkg_version_part
+    # TODO add new packages to this list
 
     New-Item $dist -Force -ItemType Directory
-
-    PipInstall
+    Install-Bumpversion
 
     foreach ($key in $packages.Keys) {
 
         $part = $packages[$key]
 
-        Write-Output "package '$key' version '$part'"
-
         if ($part -and $part -ne "") {
-            Write-Output "version part: $part"
 
             $packageFolder = $(Join-Path $sourceFiles $key)
 
-            Write-Output "package folder: $packageFolder"
-
+            Write-Output "Increment '$part' version for '$key' "
+            Write-Output "Package folder: $packageFolder"
+            
             Set-Location $packageFolder
             Update-Version $part
-        
-            Build-Python
+            Invoke-Python
 
             if ($packages["azure-iot-nspkg"] -ne "") {
 
-                # this is an extra step required only for this package
-                Build-Python2x
+                Invoke-Python2x # this is an extra step required only for this package
             }
 
             $distfld = Join-Path $packageFolder "dist"
@@ -69,9 +67,13 @@ function Build {
 
             $packagefld = Join-Path $dist $key
             New-Item $packagefld -Force -ItemType Directory
+            Write-Output "Copying ($($files.Count)) package files to output folder"
 
             foreach ($file in $files) {
-                Copy-Item $file.FullName $(Join-Path $packagefld $file.Name)
+
+                $target = $(Join-Path $packagefld $file.Name)
+                Write-Output "$($file.FullName) >> $target"
+                Copy-Item $file.FullName $target
             }
         }
         else {
