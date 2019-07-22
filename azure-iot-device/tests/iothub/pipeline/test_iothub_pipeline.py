@@ -127,7 +127,7 @@ class TestIoTHubPipelineInstantiation(object):
         assert op.auth_provider is auth_provider
 
     @pytest.mark.it(
-        "Propagates exceptions that occured in execution upon unsuccessful completion of the SetAuthProviderOperation"
+        "Propagates exceptions that occurred in execution upon unsuccessful completion of the SetAuthProviderOperation"
     )
     def test_sas_auth_op_fail(self, mocker, device_connection_string):
         mocker.patch.object(pipeline_stages_base, "PipelineRootStage")
@@ -152,7 +152,7 @@ class TestIoTHubPipelineInstantiation(object):
         assert op.auth_provider is auth_provider
 
     @pytest.mark.it(
-        "Propagates exceptions that occured in execution upon unsuccessful completion of the SetX509AuthProviderOperation"
+        "Propagates exceptions that occurred in execution upon unsuccessful completion of the SetX509AuthProviderOperation"
     )
     def test_cert_auth_op_fail(self, mocker, x509):
         mocker.patch.object(pipeline_stages_base, "PipelineRootStage")

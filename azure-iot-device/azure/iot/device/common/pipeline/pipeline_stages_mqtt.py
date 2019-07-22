@@ -226,7 +226,7 @@ class MQTTClientStage(PipelineStage):
         Handler that gets called by the transport when it connections.  This handler only
         gets called when it connects outside of the normal connect/reconnect logic.
         """
-        logger.warn("an unexpected connection occured")
+        logger.warn("an unexpected connection occurred")
         self.on_connected()
 
     @pipeline_thread.invoke_on_pipeline_thread_nowait
@@ -237,7 +237,7 @@ class MQTTClientStage(PipelineStage):
         which should not happen, so the only real route of action is to pass the failure up
         to the unhandled error handler
         """
-        logger.error("an unexpected connection failure occured: {}".format(cause))
+        logger.error("an unexpected connection failure occurred: {}".format(cause))
         self.pipeline_root.unhandled_error_handler(cause)
 
     @pipeline_thread.invoke_on_pipeline_thread_nowait
@@ -248,6 +248,6 @@ class MQTTClientStage(PipelineStage):
         which should not happen, so the only real route of action is to pass the failure up
         to the unhandled error handler
         """
-        logger.error("an unexpected disconnection occured: {}".format(cause))
+        logger.error("an unexpected disconnection occurred: {}".format(cause))
         self.pipeline_root.unhandled_error_handler(cause)
         self.on_disconnected()

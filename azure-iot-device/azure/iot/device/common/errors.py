@@ -94,7 +94,7 @@ class MessageTooLargeError(Exception):
     pass
 
 
-class ThrottlineError(Exception):
+class ThrottlingError(Exception):
     """
     Service returned 429
     """

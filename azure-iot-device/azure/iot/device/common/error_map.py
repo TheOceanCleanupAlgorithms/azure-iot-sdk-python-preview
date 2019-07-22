@@ -14,7 +14,7 @@ status_code_to_error = {
     409: errors.DeviceAlreadyExistsError,
     412: errors.InvalidEtagError,
     413: errors.MessageTooLargeError,
-    429: errors.ThrottlineError,
+    429: errors.ThrottlingError,
     500: errors.InternalServiceError,
     502: errors.BadDeviceResponseError,
     503: errors.ServiceUnavailableError,
