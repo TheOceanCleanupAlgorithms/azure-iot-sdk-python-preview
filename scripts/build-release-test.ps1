@@ -22,6 +22,4 @@ function BumpVersion($part) {
     # disabled
  }
 
-# Write-Host GetPython2x
-
 Build

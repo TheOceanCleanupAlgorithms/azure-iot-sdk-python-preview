@@ -14,14 +14,11 @@ function Build-Python {
 
 function Build-Python2x {
     pip install virtualenvwrapper-win
-    mkvirtualenv --python=$(Get-Python2x) python2-64
+    $py2 = "C:\Python27amd64\python.exe"
+    mkvirtualenv --python=$py2 python2-64
     workon python2-64
     python setup.py bdist_wheel
     rmvirtualenv python2-64
-}
-
-function Get-Python2x {
-    return $(python -c "import sys; print sys.executable")
 }
 
 function Build {
@@ -43,14 +40,14 @@ function Build {
 
         $part = $packages[$key]
 
-        Write-Host "package '$key' version '$part'"
+        Write-Output "package '$key' version '$part'"
 
         if ($part -and $part -ne "") {
-            Write-Host "version part: $part"
+            Write-Output "version part: $part"
 
             $packageFolder = $(Join-Path $sourceFiles $key)
 
-            Write-Host "package folder: $packageFolder"
+            Write-Output "package folder: $packageFolder"
 
             Set-Location $packageFolder
             Update-Version $part
@@ -78,7 +75,7 @@ function Build {
             }
         }
         else {
-            Write-Host "no version bump for package '$key'"
+            Write-Output "no version bump for package '$key'"
         }
     }
 }
