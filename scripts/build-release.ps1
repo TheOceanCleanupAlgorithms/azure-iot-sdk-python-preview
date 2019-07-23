@@ -1,4 +1,4 @@
-$WhatIfPreference = $true
+#$WhatIfPreference = $true
 
 function Install-Dependencies {
     pip install bumpversion
