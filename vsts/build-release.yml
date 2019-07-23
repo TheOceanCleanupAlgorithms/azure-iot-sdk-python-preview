@@ -5,7 +5,7 @@ schedules:
   displayName: "Daily Release Pipeline Test"
   branches:
     include: [ move-script ] # which branches the schedule applies to
-  always: true # whether to always run the pipeline or only if there have been source code changes since the last run. The default is false.
+  always: true
 
 steps:
 
@@ -29,11 +29,6 @@ steps:
     addToPath: true
     architecture: 'x64'
 
-- task: CmdLine@2
-  inputs:
-    script: 'python --version'
-  displayName: 'Tell Python Version'
-
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -46,6 +41,16 @@ steps:
     device_version_part: $(azure-iot-device-version-part)
     nspkg_version_part: $(azure-iot-nspkg-version-part)
   displayName: 'build release artifacts'
+
+- task: CmdLine@2
+  inputs:
+    script: |
+      python.exe setup.py bdist_wheel
+  env:
+    dist: $(System.ArtifactsDirectory)\dist
+    location: $(Build.SourcesDirectory)\azure-iot-nspkg
+    nspkg_version_part: $(azure-iot-nspkg-version-part)
+  displayName: 'build nspkg for python2'
 
 - task: PowerShell@2
   inputs:
