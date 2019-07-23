@@ -1,11 +1,11 @@
 name: ReleaseBuild_$(BuildID)_$(Date:yyyyMMdd)$(Rev:.r)
 
 schedules:
-- cron: "0 8 * * Mon-Fri" # cron syntax defining a schedule
+- cron: "40 14 * * Mon-Fri" # cron syntax defining a schedule
   displayName: "Daily Release Pipeline Test"
   branches:
     include: [ move-script ] # which branches the schedule applies to
-  always: true # whether to always run the pipeline or only if there have been source code changes since the last run. The default is false.
+  always: true
 
 steps:
 
@@ -42,6 +42,33 @@ steps:
     nspkg_version_part: $(azure-iot-nspkg-version-part)
   displayName: 'build release artifacts'
 
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '2.7'
+    addToPath: true
+    architecture: 'x64'
+
+- task: CmdLine@2
+  inputs:
+    script: |
+      IF [%VERSION%] EQU [] (
+          echo Skipping Python2 build for azure-iot-nspkg (version unset)
+          GOTO EOF
+      )
+      pushd %LOCATION%
+      pip install wheel
+      python --version
+      python.exe setup.py bdist_wheel
+      robocopy /V %LOCATION%\dist %DIST%\azure-iot-nspkg
+      popd
+      IF %ERRORLEVEL% == 1 exit /b 0
+      :EOF
+  env:
+    dist: $(System.ArtifactsDirectory)\dist
+    location: $(Build.SourcesDirectory)\azure-iot-nspkg
+    version: $(azure-iot-nspkg-version-part)
+  displayName: 'build nspkg for python2'
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -66,5 +93,3 @@ steps:
       ArtifactName: 'dist'
       publishLocation: 'Container'
   enabled: 'true'
-
-
