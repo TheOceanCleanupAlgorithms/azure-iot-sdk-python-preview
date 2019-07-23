@@ -103,7 +103,7 @@ class MQTTClientStage(PipelineStage):
         elif isinstance(op, pipeline_ops_base.ReconnectOperation):
             logger.info("{}({}): reconnecting".format(self.name, op.name))
 
-            # we treat connect and reconnect the same here because the both result in a CONACK
+            # We set _active_connect_op here because a reconnect is the same as a connect for "active operation" tracking purposes.
             self._cancel_active_connect_disconnect_ops()
             self._active_connect_op = op
             try:
@@ -180,6 +180,7 @@ class MQTTClientStage(PipelineStage):
             operation_flow.complete_op(stage=self, op=op)
         else:
             logger.warning("Connection was unexpected")
+        # self.on_connected() tells other pipeilne stages that we're connected
         self.on_connected()
 
     @pipeline_thread.invoke_on_pipeline_thread_nowait
@@ -214,4 +215,5 @@ class MQTTClientStage(PipelineStage):
         else:
             logger.warning("{}: disconnection was unexpected".format(self.name))
             unhandled_exceptions.exception_caught_in_background_thread(cause)
+        # self.on_disconnected() tells other pipeilne stages that we're disconnected
         self.on_disconnected()
