@@ -10,16 +10,12 @@ function Update-Version($part) {
     # disabled
 }
 
- function Install-Bumpversion {
-    # disabled
- }
- 
- function Invoke-Python {
-    # disabled
- }
- 
- function Invoke-Python2x {
-    # disabled
- }
+function Install-Dependencies {
+   # disabled
+}
+
+function Invoke-Python {
+   # disabled
+}
 
 Build

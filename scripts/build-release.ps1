@@ -1,6 +1,6 @@
-#$WhatIfPreference = $true
+$WhatIfPreference = $true
 
-function Install-Bumpversion {
+function Install-Dependencies {
     pip install bumpversion
     pip install wheel
 }
@@ -14,16 +14,9 @@ function Invoke-Python {
     python setup.py bdist_wheel
 }
 
-function Invoke-Python2x {
-    pip install virtualenvwrapper-win
-    $py2 = "C:\Python27amd64\python.exe"
-    mkvirtualenv --python=$py2 python2-64
-    workon python2-64
-    python setup.py bdist_wheel
-    rmvirtualenv python2-64
-}
-
 function Build {
+
+    Write-Output "Python version is '$(python.exe --version)'"
 
     $sourceFiles = $env:sources  # sdk repo top folder
     $dist = $env:dist  # release artifacts top folder
@@ -36,7 +29,7 @@ function Build {
     # TODO add new packages to this list
 
     New-Item $dist -Force -ItemType Directory
-    Install-Bumpversion
+    Install-Dependencies
 
     foreach ($key in $packages.Keys) {
 
@@ -52,11 +45,6 @@ function Build {
             Set-Location $packageFolder
             Update-Version $part
             Invoke-Python
-
-            if ($packages["azure-iot-nspkg"] -ne "") {
-
-                Invoke-Python2x # this is an extra step required only for this package
-            }
 
             $distfld = Join-Path $packageFolder "dist"
             $files = Get-ChildItem $distfld
@@ -77,7 +65,7 @@ function Build {
             }
         }
         else {
-            Write-Output "no version bump for package '$key'"
+            Write-Output "Skipping '$key'"
         }
     }
 }
