@@ -52,6 +52,8 @@ steps:
   inputs:
     script: |
       cd %location%
+      pip install wheel
+      python --version
       python.exe setup.py bdist_wheel
       tree /f /a
   env:
