@@ -51,15 +51,21 @@ steps:
 - task: CmdLine@2
   inputs:
     script: |
-      cd %location%
+      IF [%VERSION%] EQU [] (
+          echo "Skipping Python2 build for azure-iot-nspkg (version unset)"
+          GOTO EOF
+      )
+      pushd %LOCATION%
       pip install wheel
       python --version
       python.exe setup.py bdist_wheel
-      tree /f /a
+      robocopy .\dist\*.* %DIST% /V
+      :EOF
+      popd
   env:
     dist: $(System.ArtifactsDirectory)\dist
     location: $(Build.SourcesDirectory)\azure-iot-nspkg
-    nspkg_version_part: $(azure-iot-nspkg-version-part)
+    version: $(azure-iot-nspkg-version-part)
   displayName: 'build nspkg for python2'
 
 - task: PowerShell@2
