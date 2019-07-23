@@ -59,9 +59,9 @@ steps:
       pip install wheel
       python --version
       python.exe setup.py bdist_wheel
-      robocopy .\dist\*.* %DIST% /V
-      :EOF
+      robocopy /V %LOCATION%\dist %DIST%\azure-iot-nspkg
       popd
+      :EOF
   env:
     dist: $(System.ArtifactsDirectory)\dist
     location: $(Build.SourcesDirectory)\azure-iot-nspkg
