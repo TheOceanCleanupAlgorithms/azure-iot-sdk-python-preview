@@ -1,7 +1,7 @@
 name: ReleaseBuild_$(BuildID)_$(Date:yyyyMMdd)$(Rev:.r)
 
 schedules:
-- cron: "40 14 * * Mon-Fri" # cron syntax defining a schedule
+- cron: "11 23 * * Mon-Fri" # cron syntax defining a schedule
   displayName: "Daily Release Pipeline Test"
   branches:
     include: [ move-script ] # which branches the schedule applies to
@@ -51,6 +51,7 @@ steps:
 - task: CmdLine@2
   inputs:
     script: |
+      echo hello world
       IF [%VERSION%] EQU [] (
           echo Skipping Python2 build for azure-iot-nspkg (version unset)
           GOTO EOF
