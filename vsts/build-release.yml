@@ -52,7 +52,7 @@ steps:
   inputs:
     script: |
       IF [%VERSION%] EQU [] (
-          echo "Skipping Python2 build for azure-iot-nspkg (version unset)"
+          echo Skipping Python2 build for azure-iot-nspkg (version unset)
           GOTO EOF
       )
       pushd %LOCATION%
@@ -93,9 +93,3 @@ steps:
       ArtifactName: 'dist'
       publishLocation: 'Container'
   enabled: 'true'
-
-- task: CmdLine@2
-  inputs:
-    script: |
-      cd $(Build.SourcesDirectory)
-      tree /f /a
